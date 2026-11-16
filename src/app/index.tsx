@@ -1,98 +1,46 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Entrada, listarEntradas } from '../db/database';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function Lista() {
+  const router = useRouter();
+  const [entradas, setEntradas] = useState<Entrada[]>([]);
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+  useFocusEffect(
+    useCallback(() => {
+      listarEntradas().then(setEntradas);
+    }, [])
+  );
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <View style={s.container}>
+      <FlatList
+        data={entradas}
+        keyExtractor={(e) => String(e.id)}
+        contentInsetAdjustmentBehavior="automatic"
+        ListEmptyComponent={<Text style={s.vazio}>Nenhuma entrada ainda.</Text>}
+        renderItem={({ item }) => (
+          <View style={s.card}>
+            <Text style={s.titulo}>{item.humor} {item.titulo}</Text>
+            <Text style={s.data}>{new Date(item.criadaEm).toLocaleDateString('pt-BR')}</Text>
+            <Text numberOfLines={2}>{item.texto}</Text>
+          </View>
+        )}
+      />
+      <Pressable style={s.botao} onPress={() => router.push('/nova')}>
+        <Text style={s.botaoTexto}>+ Nova entrada</Text>
+      </Pressable>
+    </View>
   );
 }
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+const s = StyleSheet.create({
+  container: { flex: 1, padding: 16 },
+  vazio: { textAlign: 'center', marginTop: 40, opacity: 0.6 },
+  card: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#ddd', marginBottom: 10 },
+  titulo: { fontSize: 16, fontWeight: '600' },
+  data: { fontSize: 12, opacity: 0.6, marginBottom: 6 },
+  botao: { backgroundColor: '#4f46e5', padding: 14, borderRadius: 12, alignItems: 'center' },
+  botaoTexto: { color: '#fff', fontWeight: '600' },
 });
