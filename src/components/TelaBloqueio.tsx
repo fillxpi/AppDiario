@@ -14,7 +14,7 @@ export default function TelaBloqueio({ onDesbloquear }: { onDesbloquear: () => v
 
 const s = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#f2f2f2',
     alignItems: 'center',
     justifyContent: 'center',
