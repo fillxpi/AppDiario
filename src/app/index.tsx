@@ -21,12 +21,15 @@ export default function Lista() {
         contentInsetAdjustmentBehavior="automatic"
         ListEmptyComponent={<Text style={s.vazio}>Nenhuma entrada ainda.</Text>}
         renderItem={({ item }) => (
-          <View style={s.card}>
-            <Text style={s.titulo}>{item.humor} {item.titulo}</Text>
-            <Text style={s.data}>{new Date(item.criadaEm).toLocaleDateString('pt-BR')}</Text>
-            <Text numberOfLines={2}>{item.texto}</Text>
-          </View>
-        )}
+  <Pressable
+    style={s.card}
+    onPress={() => router.push({ pathname: '/entrada/[id]', params: { id: item.id } })}
+  >
+    <Text style={s.titulo}>{item.humor} {item.titulo}</Text>
+    <Text style={s.data}>{new Date(item.criadaEm).toLocaleDateString('pt-BR')}</Text>
+    <Text numberOfLines={2}>{item.texto}</Text>
+  </Pressable>
+)}
       />
       <Pressable style={s.botao} onPress={() => router.push('/nova')}>
         <Text style={s.botaoTexto}>+ Nova entrada</Text>
