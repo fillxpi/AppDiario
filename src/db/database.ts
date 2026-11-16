@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { criptografar, descriptografar } from '../utils/cripto';
 
 export type Entrada = {
   id: number;
@@ -28,38 +29,52 @@ function getDb() {
   return dbPromise;
 }
 
+async function decifrar(linha: Entrada): Promise<Entrada> {
+  return {
+    ...linha,
+    titulo: await descriptografar(linha.titulo),
+    texto: await descriptografar(linha.texto),
+  };
+}
+
 export async function listarEntradas(): Promise<Entrada[]> {
   const db = await getDb();
-  return db.getAllAsync<Entrada>(
+  const linhas = await db.getAllAsync<Entrada>(
     'SELECT id, titulo, texto, humor, criada_em AS criadaEm FROM entradas ORDER BY id DESC'
   );
+  return Promise.all(linhas.map(decifrar));
+}
+
+export async function buscarEntrada(id: number): Promise<Entrada | null> {
+  const db = await getDb();
+  const linha = await db.getFirstAsync<Entrada>(
+    'SELECT id, titulo, texto, humor, criada_em AS criadaEm FROM entradas WHERE id = ?',
+    id
+  );
+  return linha ? decifrar(linha) : null;
 }
 
 export async function criarEntrada(titulo: string, texto: string, humor: string) {
   const db = await getDb();
+  const tituloCifrado = await criptografar(titulo);
+  const textoCifrado = await criptografar(texto);
   await db.runAsync(
     'INSERT INTO entradas (titulo, texto, humor, criada_em) VALUES (?, ?, ?, ?)',
-    titulo,
-    texto,
+    tituloCifrado,
+    textoCifrado,
     humor,
     new Date().toISOString()
   );
 }
 
-export async function buscarEntrada(id: number) {
-  const db = await getDb();
-  return db.getFirstAsync<Entrada>(
-    'SELECT id, titulo, texto, humor, criada_em AS criadaEm FROM entradas WHERE id = ?',
-    id
-  );
-}
-
 export async function atualizarEntrada(id: number, titulo: string, texto: string, humor: string) {
   const db = await getDb();
+  const tituloCifrado = await criptografar(titulo);
+  const textoCifrado = await criptografar(texto);
   await db.runAsync(
     'UPDATE entradas SET titulo = ?, texto = ?, humor = ? WHERE id = ?',
-    titulo,
-    texto,
+    tituloCifrado,
+    textoCifrado,
     humor,
     id
   );
