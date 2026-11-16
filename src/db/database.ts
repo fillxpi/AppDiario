@@ -45,3 +45,27 @@ export async function criarEntrada(titulo: string, texto: string, humor: string)
     new Date().toISOString()
   );
 }
+
+export async function buscarEntrada(id: number) {
+  const db = await getDb();
+  return db.getFirstAsync<Entrada>(
+    'SELECT id, titulo, texto, humor, criada_em AS criadaEm FROM entradas WHERE id = ?',
+    id
+  );
+}
+
+export async function atualizarEntrada(id: number, titulo: string, texto: string, humor: string) {
+  const db = await getDb();
+  await db.runAsync(
+    'UPDATE entradas SET titulo = ?, texto = ?, humor = ? WHERE id = ?',
+    titulo,
+    texto,
+    humor,
+    id
+  );
+}
+
+export async function apagarEntrada(id: number) {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM entradas WHERE id = ?', id);
+}
