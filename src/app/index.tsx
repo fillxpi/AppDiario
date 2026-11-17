@@ -1,15 +1,18 @@
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { Tema } from '../constants/cores';
 import { Entrada, listarEntradas } from '../db/database';
+import { useCores } from '../hooks/useCores';
 
-// Remove acentos e ignora maiúsculas para a busca ser tolerante.
 function normalizar(texto: string) {
   return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 export default function Lista() {
   const router = useRouter();
+  const c = useCores();
+  const s = useMemo(() => estilos(c), [c]);
   const [entradas, setEntradas] = useState<Entrada[]>([]);
   const [busca, setBusca] = useState('');
 
@@ -36,6 +39,7 @@ export default function Lista() {
           <TextInput
             style={s.busca}
             placeholder="Buscar nas entradas"
+            placeholderTextColor={c.textoSuave}
             value={busca}
             onChangeText={setBusca}
             autoCapitalize="none"
@@ -55,7 +59,7 @@ export default function Lista() {
           >
             <Text style={s.titulo}>{item.humor} {item.titulo}</Text>
             <Text style={s.data}>{new Date(item.criadaEm).toLocaleDateString('pt-BR')}</Text>
-            <Text numberOfLines={2}>{item.texto}</Text>
+            <Text style={s.texto} numberOfLines={2}>{item.texto}</Text>
           </Pressable>
         )}
       />
@@ -66,13 +70,30 @@ export default function Lista() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  busca: { borderWidth: 1, borderColor: '#ddd', borderRadius: 12, padding: 12, marginBottom: 12 },
-  vazio: { textAlign: 'center', marginTop: 40, opacity: 0.6 },
-  card: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#ddd', marginBottom: 10 },
-  titulo: { fontSize: 16, fontWeight: '600' },
-  data: { fontSize: 12, opacity: 0.6, marginBottom: 6 },
-  botao: { backgroundColor: '#4f46e5', padding: 14, borderRadius: 12, alignItems: 'center' },
-  botaoTexto: { color: '#fff', fontWeight: '600' },
-});
+const estilos = (c: Tema) =>
+  StyleSheet.create({
+    container: { flex: 1, padding: 16, backgroundColor: c.fundo },
+    busca: {
+      borderWidth: 1,
+      borderColor: c.borda,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 12,
+      backgroundColor: c.cartao,
+      color: c.texto,
+    },
+    vazio: { textAlign: 'center', marginTop: 40, color: c.textoSuave },
+    card: {
+      padding: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.borda,
+      backgroundColor: c.cartao,
+      marginBottom: 10,
+    },
+    titulo: { fontSize: 16, fontWeight: '600', color: c.texto },
+    data: { fontSize: 12, color: c.textoSuave, marginBottom: 6 },
+    texto: { color: c.texto },
+    botao: { backgroundColor: c.primaria, padding: 14, borderRadius: 12, alignItems: 'center' },
+    botaoTexto: { color: c.textoBotao, fontWeight: '600' },
+  });

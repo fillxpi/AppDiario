@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Tema } from '../../constants/cores';
 import { apagarEntrada, atualizarEntrada, buscarEntrada } from '../../db/database';
+import { useCores } from '../../hooks/useCores';
 
 const HUMORES = ['😄', '🙂', '😐', '😟', '😢'];
 
 export default function Detalhe() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const c = useCores();
+  const s = useMemo(() => estilos(c), [c]);
   const [titulo, setTitulo] = useState('');
   const [texto, setTexto] = useState('');
   const [humor, setHumor] = useState('🙂');
@@ -43,11 +47,18 @@ export default function Detalhe() {
 
   return (
     <ScrollView
+      style={{ backgroundColor: c.fundo }}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={s.container}
     >
-      <TextInput style={s.input} placeholder="Título" value={titulo} onChangeText={setTitulo} />
+      <TextInput
+        style={s.input}
+        placeholder="Título"
+        placeholderTextColor={c.textoSuave}
+        value={titulo}
+        onChangeText={setTitulo}
+      />
       <View style={s.humores}>
         {HUMORES.map((h) => (
           <Pressable key={h} onPress={() => setHumor(h)} style={[s.humor, humor === h && s.humorAtivo]}>
@@ -71,14 +82,22 @@ export default function Detalhe() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { padding: 16, gap: 12 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 12, padding: 12 },
-  humores: { flexDirection: 'row', justifyContent: 'space-between' },
-  humor: { padding: 8, borderRadius: 12, borderWidth: 1, borderColor: 'transparent' },
-  humorAtivo: { borderColor: '#4f46e5' },
-  botao: { backgroundColor: '#4f46e5', padding: 14, borderRadius: 12, alignItems: 'center' },
-  botaoTexto: { color: '#fff', fontWeight: '600' },
-  botaoApagar: { padding: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#dc2626' },
-  botaoApagarTexto: { color: '#dc2626', fontWeight: '600' },
-});
+const estilos = (c: Tema) =>
+  StyleSheet.create({
+    container: { padding: 16, gap: 12 },
+    input: {
+      borderWidth: 1,
+      borderColor: c.borda,
+      borderRadius: 12,
+      padding: 12,
+      backgroundColor: c.cartao,
+      color: c.texto,
+    },
+    humores: { flexDirection: 'row', justifyContent: 'space-between' },
+    humor: { padding: 8, borderRadius: 12, borderWidth: 1, borderColor: 'transparent' },
+    humorAtivo: { borderColor: c.primaria },
+    botao: { backgroundColor: c.primaria, padding: 14, borderRadius: 12, alignItems: 'center' },
+    botaoTexto: { color: c.textoBotao, fontWeight: '600' },
+    botaoApagar: { padding: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: c.perigo },
+    botaoApagarTexto: { color: c.perigo, fontWeight: '600' },
+  });
