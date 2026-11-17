@@ -31,8 +31,8 @@
           "imageWidth": 200,
           "backgroundColor": "#f2f2f2",
           "dark": {
-          "backgroundColor": "#0f0f14"
-           }
+            "backgroundColor": "#0f0f14"
+          }
         }
       ],
       "expo-sqlite",
@@ -41,6 +41,16 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "1527e170-543d-43f3-a7eb-f44a736695cc"
+      }
     }
   }
 }
